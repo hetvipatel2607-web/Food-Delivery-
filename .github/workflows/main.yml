@@ -1,4 +1,5 @@
-name: Food Delivery CI
+
+name: Food Delivery CI-CD
 
 on:
   push:
@@ -8,13 +9,14 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -23,8 +25,20 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Build project
+      - name: Build Application
         run: npm run build
+
+      - name: Run Tests
+        run: npm test --if-present
+
+      - name: Package Application
+        run: tar -czf food-delivery-build.tar.gz dist/
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: food-delivery-build
+          path: food-delivery-build.tar.gz
